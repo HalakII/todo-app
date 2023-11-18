@@ -45,6 +45,10 @@ ul {
   color: #fff;
 }
 .btn-delete {
+  background-image: url('../img/icons8-trash.svg');
+  background-size: 20px;
+  background-repeat: no-repeat;
+  background-position: center;
   width: 30px;
   height: 30px;
   background-color: white;
@@ -65,7 +69,7 @@ ul {
   border-radius: 50%;
   border: none;
   padding-left: 2px;
-  margin-right: 5px;
+  /* margin-right: 5px; */
 }
 .input-js {
   border: 2px solid #00cfff;
@@ -148,12 +152,33 @@ ul {
   margin-right: 10px;
   border-radius: 20px;
   border: none;
+  color: #fff;
 }
 .btn-close-modal {
   position: absolute;
+  width: 30px;
+  height: 30px;
   top: 10px;
   right: 10px;
   border-radius: 50%;
   border: none;
   background-color: #fff;
+  background-image: url('../img/211652_close_icon.svg');
+  background-size: 15px;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  border: 0;
+  padding: 0;
+
+  white-space: nowrap;
+  clip-path: inset(100%);
+  clip: rect(0 0 0 0);
+  overflow: hidden;
 }

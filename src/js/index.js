@@ -1,22 +1,52 @@
+import * as basicLightbox from 'basiclightbox';
+import '../../node_modules/basiclightbox/dist/basicLightbox.min.css';
+
 const input = document.querySelector('.input-js');
 const btn = document.querySelector('.btn-add');
 const list = document.querySelector('.todo-list');
 const LS_KEY = 'todo';
+
 const todoArr = JSON.parse(localStorage.getItem(LS_KEY)) ?? [];
 console.log(todoArr);
 
-btn.addEventListener('click', createObj);
+let modalWindow = {};
+let btnModalClose = null;
+let btnModalUpdate = null;
+let inputModal = null;
+let editId = null;
+
+btn.addEventListener('click', addTodo);
 list.addEventListener('click', onListClick);
 list.addEventListener('click', onDelClick);
+list.addEventListener('click', onEditClick);
 
 if (todoArr.length) {
-  const todosMarkup = todoArr.map(createMarkup).join('');
+  const todosMarkup = todoArr.map(todoMarkup).join('');
   //   console.log(todosMarkup);
   list.insertAdjacentHTML('beforeend', todosMarkup);
 }
 
+// const instance = basicLightbox.create(
+//   document.querySelector('.modal-container')
+// );
+// instance.show();
+
+function addTodo() {
+  if (!input.value.trim()) {
+    return;
+  }
+  const object = {
+    id: Date.now(),
+    status: 'todo',
+    text: input.value,
+  };
+
+  list.insertAdjacentHTML('beforeend', todoMarkup(object));
+  todoArr.push(object);
+  localStorage.setItem(LS_KEY, JSON.stringify(todoArr));
+}
+
 function onListClick(event) {
-  //   console.log(event);
   if (event.target.nodeName !== 'LI') {
     return;
   }
@@ -34,6 +64,68 @@ function onListClick(event) {
   changeLSStatus(event.target);
 }
 
+function onEditClick(event) {
+  if (!event.target.classList.contains('btn-update')) {
+    return;
+  }
+  console.dir(event.target.closest('li'));
+  editId = +event.target.closest('li').id;
+  const dataLS = JSON.parse(localStorage.getItem(LS_KEY));
+
+  const todoObj = dataLS.find(obj => obj.id === editId);
+
+  console.log(todoObj);
+  modalWindow = basicLightbox.create(createModalTemplate(todoObj), {
+    onShow: () => {},
+    onClose: modalWindow => {
+      btnModalClose.removeEventListener('click', onModalCloseClick);
+      btnModalUpdate.removeEventListener('click', onModalUpdate);
+    },
+  });
+
+  btnModalClose = modalWindow.element().querySelector('.btn-close-modal');
+  btnModalClose.addEventListener('click', onModalCloseClick);
+
+  btnModalUpdate = modalWindow.element().querySelector('.btn-update-modal');
+  btnModalUpdate.addEventListener('click', onModalUpdate);
+  inputModal = modalWindow.element().querySelector('.input-modal');
+
+  modalWindow.show();
+}
+
+function onModalUpdate() {
+  if (!inputModal.value.trim()) {
+    return;
+  }
+
+  const dataLS = JSON.parse(localStorage.getItem(LS_KEY));
+  const changeArr = dataLS.map(obj =>
+    obj.id === editId ? { ...obj, text: inputModal.value } : obj
+  );
+
+  console.log(changeArr);
+  localStorage.setItem(LS_KEY, JSON.stringify(changeArr));
+  modalWindow.close();
+  console.log('M update');
+  document.getElementById(editId).firstElementChild.textContent =
+    inputModal.value;
+}
+
+function onModalCloseClick() {
+  console.log('M close');
+  modalWindow.close();
+}
+
+function createModalTemplate({ text }) {
+  return `<div class="modal-container">
+      <div class="input-container">
+        <input type="text" class="input-modal"  value="${text}" />
+        <button type="button" class="btn-update-modal">Update todo</button>
+      </div>
+      <button type="button" class="btn-close-modal"></button>
+    </div>`;
+}
+
 function onDelClick(event) {
   if (!event.target.classList.contains('btn-delete')) {
     return;
@@ -47,22 +139,7 @@ function onDelClick(event) {
   console.log(newArr);
 }
 
-function createObj() {
-  if (!input.value.trim()) {
-    return;
-  }
-  const object = {
-    id: Date.now(),
-    status: 'todo',
-    text: input.value,
-  };
-
-  list.insertAdjacentHTML('beforeend', createMarkup(object));
-  todoArr.push(object);
-  localStorage.setItem(LS_KEY, JSON.stringify(todoArr));
-}
-
-function createMarkup({ id, status, text }) {
+function todoMarkup({ id, status, text }) {
   const toggleStatus = status === 'todo' ? 'btn-update' : 'btn-delete';
   return `<li class="${status}" id="${id}">
   <p>${text}</p>
